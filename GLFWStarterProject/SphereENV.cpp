@@ -1,4 +1,6 @@
 #include "SphereENV.h"
+#include <concrt.h>
+
 
 SphereENV::SphereENV()
 {
