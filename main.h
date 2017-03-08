@@ -11,5 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "window.h"
+#include "thinkgear.h"
+#include <iostream>
+#include "time.h"
 
 #endif

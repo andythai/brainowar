@@ -12,7 +12,6 @@
 #include <GLFW/glfw3.h>
 #include "Skybox.h"
 #include "shader.h"
-#include "GLFWStarterProject/Sphere.h"
 #include "GLFWStarterProject/SphereENV.h"
 
 class Window
@@ -30,6 +29,7 @@ public:
 
 	// Methods
 	static glm::vec3 trackball(float x, float y);
+	static void reset_ball();
 
 	// Custom callbacks
 	static void cursor_callback(GLFWwindow* window, double xpos, double ypos);
@@ -38,7 +38,7 @@ public:
 
 	// Callbacks
 	static void resize_callback(GLFWwindow* window, int width, int height);
-	static void idle_callback();
+	static bool idle_callback(int player1, int player2);
 	static void display_callback(GLFWwindow*);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };

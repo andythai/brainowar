@@ -1,6 +1,6 @@
 #include "window.h"
 
-const char* window_title = "Project 4";
+const char* window_title = "Brain-o-War";
 
 // Initializations
 Skybox * skybox;
@@ -208,9 +208,30 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	}
 }
 
-void Window::idle_callback()
+bool Window::idle_callback(int player1, int player2)
 {
-	// Call the update function the cube
+	float x_bounds_p1 = -9.0f;
+	float x_bounds_p2 = 9.0f;
+	float x_translation = (player1 - player2) / 100.0f;
+	env->translate(x_translation, 0);
+
+	if (env->position_x > x_bounds_p2) {
+		std::cout << "\nPLAYER 1 WINS!" << std::endl;
+		return true;
+	}
+	else if (env->position_x < x_bounds_p1) {
+		std::cout << "\nPLAYER 2 WINS!" << std::endl;
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void Window::reset_ball() {
+	env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	env->position_x = 0;
+	env->position_y = 0;
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -266,6 +287,11 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		}
 		else if (key == GLFW_KEY_DOWN) {
 			env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)) * env->toWorld;
+		}
+		else if (key == GLFW_KEY_ENTER) {
+			if (idle_callback(0.0f, 0.0f) == true) {
+				Window::reset_ball();
+			}
 		}
 	}
 }

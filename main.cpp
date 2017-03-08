@@ -35,7 +35,7 @@ void setup_glew()
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 		glfwTerminate();
 	}
-	fprintf(stdout, "Current GLEW version: %s\n", glewGetString(GLEW_VERSION));
+	fprintf(stdout, "Current GLEW version: %s\n\n", glewGetString(GLEW_VERSION));
 #endif
 }
 
@@ -85,13 +85,134 @@ int main(void)
 	// Initialize objects/pointers for rendering
 	Window::initialize_objects();
 
+	// ThinkGear variables
+	char *comPortName = NULL;
+	int   dllVersion = 0;
+	int   connectionId = 0;
+	int   packetsRead = 0;
+	int   errCode = 0;
+
+	double secondsToRun = 0;
+	time_t startTime = 0;
+	time_t currTime = 0;
+	char  *currTimeStr = NULL;
+	int set_filter_flag = 0;
+	int count = 0;
+
+	/* Print driver version number */
+	dllVersion = TG_GetVersion();
+	printf("Stream SDK for PC version: %d\n", dllVersion);
+
+	/* Get a connection ID handle to ThinkGear */
+	connectionId = TG_GetNewConnectionId();
+	if (connectionId < 0) {
+		fprintf(stderr, "ERROR: TG_GetNewConnectionId() returned %d.\n",
+			connectionId);
+		fprintf(stderr, "Press ENTER to continue...\n", connectionId);
+		std::cin.ignore();
+		//exit(EXIT_FAILURE);
+	}
+
+	/* Set/open stream (raw bytes) log file for connection */
+	errCode = TG_SetStreamLog(connectionId, "streamLog.txt");
+	if (errCode < 0) {
+		fprintf(stderr, "ERROR: TG_SetStreamLog() returned %d.\n", errCode);
+		fprintf(stderr, "Press ENTER to continue...\n", errCode);
+		std::cin.ignore();
+		//exit(EXIT_FAILURE);
+	}
+
+	/* Set/open data (ThinkGear values) log file for connection */
+	errCode = TG_SetDataLog(connectionId, "dataLog.txt");
+	if (errCode < 0) {
+		fprintf(stderr, "ERROR: TG_SetDataLog() returned %d.\n", errCode);
+		fprintf(stderr, "Press ENTER to continue...\n", errCode);
+		std::cin.ignore();
+		//exit(EXIT_FAILURE);
+	}
+
+	/* Attempt to connect the connection ID handle to serial port "COM5" */
+	/* NOTE: On Windows, COM10 and higher must be preceded by \\.\, as in
+	*       "\\\\.\\COM12" (must escape backslashes in strings).  COM9
+	*       and lower do not require the \\.\, but are allowed to include
+	*       them.  On Mac OS X, COM ports are named like
+	*       "/dev/tty.MindSet-DevB-1".
+	*/
+	comPortName = "\\\\.\\COM3";
+	errCode = TG_Connect(connectionId,
+		comPortName,
+		TG_BAUD_57600,
+		TG_STREAM_PACKETS);
+	if (errCode < 0) {
+		fprintf(stderr, "ERROR: TG_Connect() returned %d.\n", errCode);
+		fprintf(stderr, "Press ENTER to continue...\n", errCode);
+		std::cin.ignore();
+		//exit(EXIT_FAILURE);
+	}
+
+	secondsToRun = 5;
+	time_t start_delay = time(NULL);
+	std::cout << "STARTING GAME IN 10 SECONDS..." << std::endl;
+	bool game_over = false;
+
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{
+		if (difftime(time(NULL), start_delay) > 10 && game_over == false) {
+			startTime = time(NULL);
+			while (difftime(time(NULL), startTime) < secondsToRun) {
+
+				/* Read all currently available Packets, one at a time... */
+				do {
+					// Main render display callback. Rendering of objects is done here.
+					Window::display_callback(window);
+
+
+					/* Read a single Packet from the connection */
+					packetsRead = TG_ReadPackets(connectionId, 1);
+
+					/* If TG_ReadPackets() was able to read a Packet of data... */
+					if (packetsRead == 1) {
+
+						/* If the Packet containted a new raw wave value... */
+						if (TG_GetValueStatus(connectionId, TG_DATA_ATTENTION) != 0) {
+
+							/* Get the current time as a string */
+							currTime = time(NULL);
+							currTimeStr = ctime(&currTime);
+
+							/* Get and print out the new raw value */
+							int player1_attention = (int)TG_GetValue(connectionId, TG_DATA_ATTENTION);
+							fprintf(stdout, "%s: ATT: %d\n", currTimeStr, player1_attention);
+							fflush(stdout);
+
+							// Idle callback. Updating objects, etc. can be done here.
+							game_over = Window::idle_callback(player1_attention, 0);
+
+							if (game_over) {
+								std::cout << "GAME OVER, BALL REACHED PAST BOUNDARIES." << std::endl;
+								std::cout << "\nPress ENTER to reset!" << std::endl;
+								std::cout << "After pressing ENTER, game will restart immediately." << std::endl;
+								std::cin.ignore();
+								Window::reset_ball();
+							}
+
+						} /* end "If Packet contained a raw wave value..." */
+
+					} /* end "If TG_ReadPackets() was able to read a Packet..." */
+
+				} while (packetsRead > 0); /* Keep looping until all Packets read */
+			}
+		} /* end "Keep reading ThinkGear Packets for 10 seconds..." */
+		else {
+			Window::display_callback(window);
+		}
+		/**
 		// Main render display callback. Rendering of objects is done here.
 		Window::display_callback(window);
 		// Idle callback. Updating objects, etc. can be done here.
 		Window::idle_callback();
+		**/
 	}
 
 	Window::clean_up();
