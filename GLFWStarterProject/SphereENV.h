@@ -12,6 +12,7 @@ public:
 	void draw(GLuint shaderProgram);
 	void render();
 	void update();
+	void translate(float x, float y);
 
 	// These variables are needed for the shader program
 	GLuint VBO, VAO, NBO;
@@ -21,6 +22,9 @@ public:
 	GLfloat radius = 1.0f;
 	int stacks = 10;
 	int slices = 10;
+
+	float position_x = 0;
+	float position_y = 0;
 
 	std::vector<glm::vec3> points;
 	std::vector<glm::vec3> sphereVertices;

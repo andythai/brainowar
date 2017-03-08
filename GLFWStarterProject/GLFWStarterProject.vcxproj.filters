@@ -30,6 +30,9 @@
     <ClInclude Include="SphereENV.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\thinkgear.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -68,5 +71,8 @@
     <None Include="..\skybox.vert">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\thinkgear64.lib" />
   </ItemGroup>
 </Project>

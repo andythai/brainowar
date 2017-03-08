@@ -149,6 +149,12 @@ void SphereENV::solidSphere(GLuint shaderProgram, glm::vec3 camera_pos, GLuint s
 	glBindVertexArray(0);
 }
 
+void SphereENV::translate(float x, float y) {
+	this->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, 0.0f)) * this->toWorld;
+	position_x += x;
+	position_y += y;
+}
+
 void SphereENV::draw(GLuint shaderProgram) {
 
 	// Calculate the combination of the model and view (camera inverse) matrices
