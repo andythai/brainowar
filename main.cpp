@@ -150,7 +150,7 @@ int main(void)
 		//exit(EXIT_FAILURE);
 	}
 
-	secondsToRun = 5;
+	secondsToRun = 3;
 	time_t start_delay = time(NULL);
 	std::cout << "STARTING GAME IN 10 SECONDS..." << std::endl;
 	bool game_over = false;
@@ -183,11 +183,13 @@ int main(void)
 
 							/* Get and print out the new raw value */
 							int player1_attention = (int)TG_GetValue(connectionId, TG_DATA_ATTENTION);
-							fprintf(stdout, "%s: ATT: %d\n", currTimeStr, player1_attention);
+							int player1_meditation = (int)TG_GetValue(connectionId, TG_DATA_MEDITATION);
+							fprintf(stdout, "%s: P1 ATT: %d\n", currTimeStr, player1_attention);
+							fprintf(stdout, "%s: P1 MED: %d\n", currTimeStr, player1_meditation);
 							fflush(stdout);
 
 							// Idle callback. Updating objects, etc. can be done here.
-							game_over = Window::idle_callback(player1_attention, 0);
+							game_over = Window::idle_callback(player1_attention, 0, player1_meditation, 0);
 
 							if (game_over) {
 								std::cout << "GAME OVER, BALL REACHED PAST BOUNDARIES." << std::endl;

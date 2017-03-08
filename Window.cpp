@@ -24,8 +24,8 @@ GLint env_shaderProgram;
 #define ENV_FRAGMENT_SHADER_PATH "../env.frag"
 
 // Default camera parameters
-glm::vec3 cam_pos(0.0f, -1.0f, 10.0f);		// e  | Position of camera, z = 20.0f default, reset 1.0f
-glm::vec3 cam_look_at(0.0f, -1.0f, 0.0f);	// d  | This is where the camera looks at, z = 0.0f default
+glm::vec3 cam_pos(0.0f, 0.0f, 10.0f);		// e  | Position of camera, z = 20.0f default, reset 1.0f
+glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);	// d  | This is where the camera looks at, z = 0.0f default
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);			// up | What orientation "up" is
 
 int Window::width;
@@ -55,7 +55,7 @@ void Window::initialize_objects()
 	skyboxTexture = skybox->loadCubemap();
 
 	env = new SphereENV();
-	env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 
 	// Load the shader program. Make sure you have the correct filepath up top
 	skybox_shaderProgram = LoadShaders(SKYBOX_VERTEX_SHADER_PATH, SKYBOX_FRAGMENT_SHADER_PATH);
@@ -153,38 +153,10 @@ void Window::cursor_callback(GLFWwindow* window, double xpos, double ypos)
 
 void Window::mouse_callback(GLFWwindow* window, int button, int action, int mods)
 {
-	if (action == GLFW_PRESS) {
-		button_down = true;
-		click = true;
-		old_location = trackball(cursor_x, cursor_y);
-
-		if (button == GLFW_MOUSE_BUTTON_1) {
-			lmb = true;
-			rmb = false;
-		}
-
-		if (button == GLFW_MOUSE_BUTTON_2) {
-			lmb = false;
-			rmb = true;
-		}
-	}
-	else {
-		button_down = false;
-		lmb = false;
-		rmb = false;
-	}
 }
 
 void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	if (yoffset != 0) {
-		cam_pos.z += -yoffset;
-		if (cam_pos.z == 0) {
-			cam_pos.z += -yoffset;
-		}
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
-
-	}
 }
 
 
@@ -208,18 +180,21 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	}
 }
 
-bool Window::idle_callback(int player1, int player2)
+bool Window::idle_callback(int player1_att, int player2_att, int player1_med, int player2_med)
 {
 	float x_bounds_p1 = -9.0f;
 	float x_bounds_p2 = 9.0f;
-	float x_translation = (player1 - player2) / 100.0f;
-	env->translate(x_translation, 0);
+	float y_bounds_p1 = -7.0f;
+	float y_bounds_p2 = 7.0f;
+	float x_translation = (player1_att - player2_att) / 100.0f;
+	float y_translation = (player1_med - player2_med) / 250.0f;
+	env->translate(x_translation, y_translation);
 
-	if (env->position_x > x_bounds_p2) {
+	if (env->position_x > x_bounds_p2 || env->position_y > y_bounds_p2) {
 		std::cout << "\nPLAYER 1 WINS!" << std::endl;
 		return true;
 	}
-	else if (env->position_x < x_bounds_p1) {
+	else if (env->position_x < x_bounds_p1 || env->position_y < y_bounds_p1) {
 		std::cout << "\nPLAYER 2 WINS!" << std::endl;
 		return true;
 	}
@@ -229,7 +204,7 @@ bool Window::idle_callback(int player1, int player2)
 }
 
 void Window::reset_ball() {
-	env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
+	env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
 	env->position_x = 0;
 	env->position_y = 0;
 }
@@ -274,24 +249,6 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-
-		else if (key == GLFW_KEY_LEFT) {
-			env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, 0.0f, 0.0f)) * env->toWorld;
-		}
-		else if (key == GLFW_KEY_RIGHT) {
-			env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)) * env->toWorld;
-		}
-		else if (key == GLFW_KEY_UP) {
-			env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.5f, 0.0f)) * env->toWorld;
-		}
-		else if (key == GLFW_KEY_DOWN) {
-			env->toWorld = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, 0.0f)) * env->toWorld;
-		}
-		else if (key == GLFW_KEY_ENTER) {
-			if (idle_callback(0.0f, 0.0f) == true) {
-				Window::reset_ball();
-			}
 		}
 	}
 }

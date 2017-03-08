@@ -38,7 +38,7 @@ public:
 
 	// Callbacks
 	static void resize_callback(GLFWwindow* window, int width, int height);
-	static bool idle_callback(int player1, int player2);
+	static bool idle_callback(int player1_att, int player2_att, int player1_med, int player2_med);
 	static void display_callback(GLFWwindow*);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };
