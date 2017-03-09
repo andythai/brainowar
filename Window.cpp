@@ -180,22 +180,23 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 	}
 }
 
-bool Window::idle_callback(int player1_att, int player2_att, int player1_med, int player2_med)
+bool Window::idle_callback(int player1_att, int player2_att, int player1_med, int player2_med, std::string p1_name, std::string p2_name)
 {
 	float x_bounds_p1 = -9.0f;
 	float x_bounds_p2 = 9.0f;
 	float y_bounds_p1 = -7.0f;
 	float y_bounds_p2 = 7.0f;
 	float x_translation = (player1_att - player2_att) / 100.0f;
-	float y_translation = (player1_med - player2_med) / 250.0f;
+	float y_translation = (player1_med - player2_med) / 150.0f;
 	env->translate(x_translation, y_translation);
 
+	// Win conditions
 	if (env->position_x > x_bounds_p2 || env->position_y > y_bounds_p2) {
-		std::cout << "\nPLAYER 1 WINS!" << std::endl;
+		std::cout << "\nPLAYER 1 (" + p1_name + ") WINS!" << std::endl;
 		return true;
 	}
 	else if (env->position_x < x_bounds_p1 || env->position_y < y_bounds_p1) {
-		std::cout << "\nPLAYER 2 WINS!" << std::endl;
+		std::cout << "\nPLAYER 2 (" + p2_name + ") WINS!" << std::endl;
 		return true;
 	}
 	else {

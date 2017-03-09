@@ -13,6 +13,7 @@
 #include "Skybox.h"
 #include "shader.h"
 #include "GLFWStarterProject/SphereENV.h"
+#include <string>
 
 class Window
 {
@@ -38,7 +39,8 @@ public:
 
 	// Callbacks
 	static void resize_callback(GLFWwindow* window, int width, int height);
-	static bool idle_callback(int player1_att, int player2_att, int player1_med, int player2_med);
+	static bool idle_callback(int player1_att, int player2_att, int player1_med, 
+		int player2_med, std::string p1_name, std::string p2_name);
 	static void display_callback(GLFWwindow*);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 };

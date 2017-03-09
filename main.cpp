@@ -35,7 +35,7 @@ void setup_glew()
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 		glfwTerminate();
 	}
-	fprintf(stdout, "Current GLEW version: %s\n\n", glewGetString(GLEW_VERSION));
+	fprintf(stdout, "Current GLEW version: %s\n", glewGetString(GLEW_VERSION));
 #endif
 }
 
@@ -89,6 +89,7 @@ int main(void)
 	char *comPortName = NULL;
 	int   dllVersion = 0;
 	int   connectionId = 0;
+	int	  connectionId2 = 0;
 	int   packetsRead = 0;
 	int   errCode = 0;
 
@@ -106,30 +107,23 @@ int main(void)
 	/* Get a connection ID handle to ThinkGear */
 	connectionId = TG_GetNewConnectionId();
 	if (connectionId < 0) {
-		fprintf(stderr, "ERROR: TG_GetNewConnectionId() returned %d.\n",
+		fprintf(stderr, "ERROR: TG_GetNewConnectionId() returned %d for PLAYER 1.\n",
 			connectionId);
 		fprintf(stderr, "Press ENTER to continue...\n", connectionId);
 		std::cin.ignore();
 		//exit(EXIT_FAILURE);
 	}
 
-	/* Set/open stream (raw bytes) log file for connection */
-	errCode = TG_SetStreamLog(connectionId, "streamLog.txt");
-	if (errCode < 0) {
-		fprintf(stderr, "ERROR: TG_SetStreamLog() returned %d.\n", errCode);
-		fprintf(stderr, "Press ENTER to continue...\n", errCode);
+	/* Get a connection ID handle to ThinkGear for player 2 */
+	connectionId2 = TG_GetNewConnectionId();
+	if (connectionId2 < 0) {
+		fprintf(stderr, "ERROR: TG_GetNewConnectionId() returned %d for PLAYER 2.\n",
+			connectionId);
+		fprintf(stderr, "Press ENTER to continue...\n", connectionId2);
 		std::cin.ignore();
 		//exit(EXIT_FAILURE);
 	}
 
-	/* Set/open data (ThinkGear values) log file for connection */
-	errCode = TG_SetDataLog(connectionId, "dataLog.txt");
-	if (errCode < 0) {
-		fprintf(stderr, "ERROR: TG_SetDataLog() returned %d.\n", errCode);
-		fprintf(stderr, "Press ENTER to continue...\n", errCode);
-		std::cin.ignore();
-		//exit(EXIT_FAILURE);
-	}
 
 	/* Attempt to connect the connection ID handle to serial port "COM5" */
 	/* NOTE: On Windows, COM10 and higher must be preceded by \\.\, as in
@@ -138,27 +132,57 @@ int main(void)
 	*       them.  On Mac OS X, COM ports are named like
 	*       "/dev/tty.MindSet-DevB-1".
 	*/
-	comPortName = "\\\\.\\COM3";
+	comPortName = "\\\\.\\COM4";
 	errCode = TG_Connect(connectionId,
 		comPortName,
 		TG_BAUD_57600,
 		TG_STREAM_PACKETS);
 	if (errCode < 0) {
-		fprintf(stderr, "ERROR: TG_Connect() returned %d.\n", errCode);
+		fprintf(stderr, "ERROR: TG_Connect() returned %d for PLAYER 1.\n", errCode);
 		fprintf(stderr, "Press ENTER to continue...\n", errCode);
 		std::cin.ignore();
 		//exit(EXIT_FAILURE);
 	}
 
+	/* PLAYER 2 */
+	/**
+	comPortName = "\\\\.\\COM4";
+	errCode = TG_Connect(connectionId2,
+		comPortName,
+		TG_BAUD_57600,
+		TG_STREAM_PACKETS);
+	if (errCode < 0) {
+		fprintf(stderr, "ERROR: TG_Connect() returned %d for PLAYER 2.\n", errCode);
+		fprintf(stderr, "Press ENTER to continue...\n", errCode);
+		std::cin.ignore();
+		//exit(EXIT_FAILURE);
+	}
+	**/
+
+	// Get names
+	std::string p1_name;
+	std::string p2_name;
+	std::cout << "\nEnter name for PLAYER 1: ";
+	std::getline(std::cin, p1_name);
+	/**
+	std::cout << "Enter name for PLAYER 2: ";
+	std::getline(std::cin, p2_name);
+	**/
+	p2_name = "BOT";
+
+	// Set timers
 	secondsToRun = 3;
+	int sec_before_start = 10;
 	time_t start_delay = time(NULL);
-	std::cout << "STARTING GAME IN 10 SECONDS..." << std::endl;
+	std::cout << "\nSTARTING GAME IN 10 SECONDS...\n" << std::endl;
 	bool game_over = false;
 
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{
-		if (difftime(time(NULL), start_delay) > 10 && game_over == false) {
+
+		// Wait 10 sec before game starts
+		if (difftime(time(NULL), start_delay) > sec_before_start && game_over == false) {
 			startTime = time(NULL);
 			while (difftime(time(NULL), startTime) < secondsToRun) {
 
@@ -184,13 +208,26 @@ int main(void)
 							/* Get and print out the new raw value */
 							int player1_attention = (int)TG_GetValue(connectionId, TG_DATA_ATTENTION);
 							int player1_meditation = (int)TG_GetValue(connectionId, TG_DATA_MEDITATION);
-							fprintf(stdout, "%s: P1 ATT: %d\n", currTimeStr, player1_attention);
-							fprintf(stdout, "%s: P1 MED: %d\n", currTimeStr, player1_meditation);
+							//int player2_attention = (int)TG_GetValue(connectionId2, TG_DATA_ATTENTION);
+							//int player2_meditation = (int)TG_GetValue(connectionId2, TG_DATA_MEDITATION);
+							int player2_attention = 0 + (rand() % (int)(100 - 0 + 1));
+							int player2_meditation = 0 + (rand() % (int)(100 - 0 + 1));
+
+
+							// Print player 1 measures
+							fprintf(stdout, "%s: P1 (%s)\t ATT: %d\n", currTimeStr, p1_name, player1_attention);
+							fprintf(stdout, "%s: P1 (%s)\t MED: %d\n", currTimeStr, p1_name, player1_meditation);
+
+							// Print player 2 measures
+							fprintf(stdout, "%s: P2 (%s)\t ATT: %d\n", currTimeStr, p2_name, player2_attention);
+							fprintf(stdout, "%s: P2 (%s)\t MED: %d\n\n", currTimeStr, p2_name, player2_meditation);
 							fflush(stdout);
 
 							// Idle callback. Updating objects, etc. can be done here.
-							game_over = Window::idle_callback(player1_attention, 0, player1_meditation, 0);
+							game_over = Window::idle_callback(player1_attention, player2_attention, 
+								player1_meditation, player2_meditation, p1_name, p2_name);
 
+							// Ball reaches past boundaries
 							if (game_over) {
 								std::cout << "GAME OVER, BALL REACHED PAST BOUNDARIES." << std::endl;
 								std::cout << "\nPress ENTER to reset!" << std::endl;

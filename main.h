@@ -14,5 +14,6 @@
 #include "thinkgear.h"
 #include <iostream>
 #include "time.h"
+#include <string>
 
 #endif
