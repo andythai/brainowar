@@ -192,11 +192,11 @@ bool Window::idle_callback(int player1_att, int player2_att, int player1_med, in
 
 	// Win conditions
 	if (env->position_x > x_bounds_p2 || env->position_y > y_bounds_p2) {
-		std::cout << "\nPLAYER 1 (" + p1_name + ") WINS!" << std::endl;
+		std::cout << "\nYOU WIN!" << std::endl;
 		return true;
 	}
 	else if (env->position_x < x_bounds_p1 || env->position_y < y_bounds_p1) {
-		std::cout << "\nPLAYER 2 (" + p2_name + ") WINS!" << std::endl;
+		std::cout << "\nTHE BOT WINS!" << std::endl;
 		return true;
 	}
 	else {

@@ -87,6 +87,7 @@ int main(void)
 
 	// ThinkGear variables
 	char *comPortName = NULL;
+	char *comPortName2 = NULL;
 	int   dllVersion = 0;
 	int   connectionId = 0;
 	int	  connectionId2 = 0;
@@ -115,6 +116,7 @@ int main(void)
 	}
 
 	/* Get a connection ID handle to ThinkGear for player 2 */
+	/**
 	connectionId2 = TG_GetNewConnectionId();
 	if (connectionId2 < 0) {
 		fprintf(stderr, "ERROR: TG_GetNewConnectionId() returned %d for PLAYER 2.\n",
@@ -122,7 +124,7 @@ int main(void)
 		fprintf(stderr, "Press ENTER to continue...\n", connectionId2);
 		std::cin.ignore();
 		//exit(EXIT_FAILURE);
-	}
+	}**/
 
 
 	/* Attempt to connect the connection ID handle to serial port "COM5" */
@@ -138,7 +140,8 @@ int main(void)
 		TG_BAUD_57600,
 		TG_STREAM_PACKETS);
 	if (errCode < 0) {
-		fprintf(stderr, "ERROR: TG_Connect() returned %d for PLAYER 1.\n", errCode);
+		fprintf(stderr, "ERROR: TG_Connect() returned %d.\n", errCode);
+		std::cout << "WARNING: The headset has not been detected!" << std::endl;
 		fprintf(stderr, "Press ENTER to continue...\n", errCode);
 		std::cin.ignore();
 		//exit(EXIT_FAILURE);
@@ -146,29 +149,57 @@ int main(void)
 
 	/* PLAYER 2 */
 	/**
-	comPortName = "\\\\.\\COM4";
+	comPortName2 = "\\\\.\\COM5";
 	errCode = TG_Connect(connectionId2,
-		comPortName,
-		TG_BAUD_57600,
+		comPortName2,
+		TG_BAUD_9600,
 		TG_STREAM_PACKETS);
 	if (errCode < 0) {
 		fprintf(stderr, "ERROR: TG_Connect() returned %d for PLAYER 2.\n", errCode);
 		fprintf(stderr, "Press ENTER to continue...\n", errCode);
 		std::cin.ignore();
 		//exit(EXIT_FAILURE);
-	}
-	**/
+	}**/
 
 	// Get names
 	std::string p1_name;
 	std::string p2_name;
-	std::cout << "\nEnter name for PLAYER 1: ";
-	std::getline(std::cin, p1_name);
-	/**
-	std::cout << "Enter name for PLAYER 2: ";
-	std::getline(std::cin, p2_name);
-	**/
+	//std::cout << "\nEnter name for PLAYER 1: ";
+	//std::getline(std::cin, p1_name);
+
+	//std::cout << "Enter name for PLAYER 2: ";
+	//std::getline(std::cin, p2_name);
 	p2_name = "BOT";
+
+	std::string difficulty;
+	bool valid_input = false;
+	while (!valid_input) {
+		std::cout << "\nPlease choose a difficulty: (e)asy, (m)edium, (h)ard, (v)ery hard, (i)mpossible: ";
+		std::getline(std::cin, difficulty);
+		if (difficulty == "e" || difficulty == "m" || difficulty == "h" || difficulty == "v" || difficulty == "i") {
+			valid_input = true;
+		}
+		else {
+			std::cout << "Invalid input! Try again" << std::endl;
+		}
+	}
+
+	std::string full_difficulty;
+	if (difficulty == "e") {
+		full_difficulty = "Easy";
+	}
+	else if (difficulty == "m") {
+		full_difficulty = "Medium";
+	}
+	else if (difficulty == "h") {
+		full_difficulty = "Hard";
+	}
+	else if (difficulty == "v") {
+		full_difficulty = "Very Hard";
+	}
+	else if (difficulty == "i") {
+		full_difficulty = "Impossible";
+	}
 
 	// Set timers
 	secondsToRun = 3;
@@ -210,17 +241,43 @@ int main(void)
 							int player1_meditation = (int)TG_GetValue(connectionId, TG_DATA_MEDITATION);
 							//int player2_attention = (int)TG_GetValue(connectionId2, TG_DATA_ATTENTION);
 							//int player2_meditation = (int)TG_GetValue(connectionId2, TG_DATA_MEDITATION);
-							int player2_attention = 0 + (rand() % (int)(100 - 0 + 1));
-							int player2_meditation = 0 + (rand() % (int)(100 - 0 + 1));
-
+							int player2_attention;
+							int player2_meditation;
+							if (difficulty == "e") {
+								player2_attention = 0 + (rand() % (int)(35 - 0 + 1));
+								player2_meditation = 0 + (rand() % (int)(35 - 0 + 1));
+							}
+							else if (difficulty == "m") {
+								player2_attention = 0 + (rand() % (int)(100 - 0 + 1));
+								player2_meditation = 0 + (rand() % (int)(100 - 0 + 1));
+							}
+							else if (difficulty == "h") {
+								player2_attention = 50 + (rand() % (int)(100 - 50 + 1));
+								player2_meditation = 50 + (rand() % (int)(100 - 50 + 1));
+							}
+							else if (difficulty == "v") {
+								player2_attention = 75 + (rand() % (int)(100 - 75 + 1));
+								player2_meditation = 75 + (rand() % (int)(100 - 75 + 1));
+							}
+							else if (difficulty == "i") {
+								player2_attention = 90 + (rand() % (int)(100 - 90 + 1));
+								player2_meditation = 90 + (rand() % (int)(100 - 90 + 1));
+							}
 
 							// Print player 1 measures
-							fprintf(stdout, "%s: P1 (%s)\t ATT: %d\n", currTimeStr, p1_name, player1_attention);
-							fprintf(stdout, "%s: P1 (%s)\t MED: %d\n", currTimeStr, p1_name, player1_meditation);
+							std::string tabs;
+							if (difficulty == "i") {
+								tabs = "\t\t\t";
+							}
+							else {
+								tabs = "\t\t";
+							}
+							fprintf(stdout, "%sPLAYER%s ATT: %d\n", currTimeStr, tabs, player1_attention);
+							fprintf(stdout, "PLAYER%s MED: %d\n", tabs, player1_meditation);
 
 							// Print player 2 measures
-							fprintf(stdout, "%s: P2 (%s)\t ATT: %d\n", currTimeStr, p2_name, player2_attention);
-							fprintf(stdout, "%s: P2 (%s)\t MED: %d\n\n", currTimeStr, p2_name, player2_meditation);
+							fprintf(stdout, "%s (%s)\t ATT: %d\n", p2_name, full_difficulty, player2_attention);
+							fprintf(stdout, "%s (%s)\t MED: %d\n\n", p2_name, full_difficulty, player2_meditation);
 							fflush(stdout);
 
 							// Idle callback. Updating objects, etc. can be done here.
@@ -230,8 +287,35 @@ int main(void)
 							// Ball reaches past boundaries
 							if (game_over) {
 								std::cout << "GAME OVER, BALL REACHED PAST BOUNDARIES." << std::endl;
-								std::cout << "\nPress ENTER to reset!" << std::endl;
-								std::cout << "After pressing ENTER, game will restart immediately." << std::endl;
+
+								bool valid_input = false;
+								while (!valid_input) {
+									std::cout << "\nPlease choose a difficulty: (e)asy, (m)edium, (h)ard, (v)ery hard, (i)mpossible: ";
+									std::getline(std::cin, difficulty);
+									if (difficulty == "e" || difficulty == "m" || difficulty == "h" || difficulty == "v" || difficulty == "i") {
+										valid_input = true;
+									}
+									else {
+										std::cout << "Invalid input! Try again." << std::endl;
+									}
+								}
+
+								if (difficulty == "e") {
+									full_difficulty = "Easy";
+								}
+								else if (difficulty == "m") {
+									full_difficulty = "Medium";
+								}
+								else if (difficulty == "h") {
+									full_difficulty = "Hard";
+								}
+								else if (difficulty == "v") {
+									full_difficulty = "Very Hard";
+								}
+								else if (difficulty == "i") {
+									full_difficulty = "Impossible";
+								}
+								std::cout << "\nPress ENTER to restart game." << std::endl;
 								std::cin.ignore();
 								Window::reset_ball();
 							}
